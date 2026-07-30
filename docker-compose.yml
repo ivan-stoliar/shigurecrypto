@@ -31,6 +31,15 @@ services:
     volumes:
       - kafka_demo_data:/tmp/kafka-logs
 
+  redis:
+    image: redis:7.2-alpine
+    container_name: demo_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_demo_data:/data
+
 volumes:
   postgres_demo_data:
   kafka_demo_data:
+  redis_demo_data:
