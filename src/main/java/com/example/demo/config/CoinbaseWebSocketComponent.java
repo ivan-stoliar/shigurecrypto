@@ -2,7 +2,7 @@ package com.example.demo.config;
 
 import com.example.demo.entity.Trade;
 import com.example.demo.normalizer.CoinbaseNormalizer;
-import com.example.demo.service.TradeService;
+import org.springframework.kafka.core.KafkaTemplate;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class CoinbaseWebSocketComponent implements WebSocket.Listener {
     private static final long MAX_DELAY_MS = 60000;
     private static final double MULTIPLIER = 2.0;
 
-    private final TradeService tradeService;
+    private final KafkaTemplate kafkaTemplate;
     private final CoinbaseNormalizer coinbaseNormalizer;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final HttpClient httpClient = HttpClient.newHttpClient();
@@ -90,7 +90,7 @@ public class CoinbaseWebSocketComponent implements WebSocket.Listener {
                 if (trade != null) {
                     log.info("New Trade -> Symbol: {}, Exchange: {}, Price: {}, Quantity: {}, Timestamp: {}",
                             trade.getSymbol(), trade.getExchange(), trade.getPrice(), trade.getQuantity(), trade.getTradeTimestamp());
-                    tradeService.saveTrade(trade);
+                    kafkaTemplate.send("trades.raw", trade.getSymbol(), trade);
                 }
             } catch (Exception e) {
                 log.error("Failed to parse Coinbase trade JSON: {}", e.getMessage());

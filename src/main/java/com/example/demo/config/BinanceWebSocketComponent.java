@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.example.demo.service.TradeService;
+import org.springframework.kafka.core.KafkaTemplate;
 import lombok.RequiredArgsConstructor;
 
 @Slf4j
@@ -30,7 +30,7 @@ public class BinanceWebSocketComponent implements WebSocket.Listener {
     private static final long MAX_DELAY_MS = 60000;
     private static final double MULTIPLIER = 2.0;
 
-    private final TradeService tradeService;
+    private final KafkaTemplate kafkaTemplate;
     private final BinanceNormalizer binanceNormalizer;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final HttpClient httpClient = HttpClient.newHttpClient();
@@ -90,8 +90,8 @@ public class BinanceWebSocketComponent implements WebSocket.Listener {
                     log.info("New Trade -> Symbol: {}, Exchange: {}, Price: {}, Quantity: {}, Timestamp: {}",
                             trade.getSymbol(), trade.getExchange(), trade.getPrice(), trade.getQuantity(), trade.getTradeTimestamp());
                     
-                    // Persist trade data
-                    tradeService.saveTrade(trade);
+                    // Publish trade data to Kafka
+                    kafkaTemplate.send("trades.raw", trade.getSymbol(), trade);
                 }
             } catch (Exception e) {
                 log.error("Failed to parse Binance trade JSON: {}", e.getMessage());
