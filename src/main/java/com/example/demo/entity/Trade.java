@@ -15,8 +15,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+import jakarta.persistence.UniqueConstraint;
+
 @Entity
-@Table(name = "trade")
+@Table(name = "trade", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"symbol", "exchange", "trade_timestamp"})
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

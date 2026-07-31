@@ -18,11 +18,17 @@ public class TradeConsumer {
     @RetryableTopic
     @KafkaListener(topics = "trades.raw", groupId = "archiver-group")
     public void consumeTrade(Trade trade, Acknowledgment ack) {
-        log.debug("Consumed trade from Kafka -> Symbol: {}, Exchange: {}, Price: {}", 
+        log.debug("Consumed trade from Kafka -> Symbol: {}, Exchange: {}, Price: {}",
                 trade.getSymbol(), trade.getExchange(), trade.getPrice());
-        
-        // Let exceptions propagate so Spring Kafka's retry mechanism can catch them
-        tradeService.saveTrade(trade);
-        ack.acknowledge();
+
+        try {
+            tradeService.saveTrade(trade);
+            ack.acknowledge();
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            log.debug("Duplicate trade ignored (Idempotency): Symbol={}, Exchange={}, Timestamp={}",
+                    trade.getSymbol(), trade.getExchange(), trade.getTradeTimestamp());
+
+            ack.acknowledge();
+        }
     }
 }
