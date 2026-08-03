@@ -44,7 +44,6 @@ public class AnomalyDetectionConsumer {
         private Instant lastAnomalyEmittedAt = Instant.EPOCH;
     }
 
-    @RetryableTopic
     @KafkaListener(topics = "trades.raw", groupId = "anomaly-group")
     public void consumeTrade(Trade trade) {
         String symbol = trade.getSymbol();
@@ -57,7 +56,7 @@ public class AnomalyDetectionConsumer {
         } else if ("COINBASE".equalsIgnoreCase(trade.getExchange())) {
             state.getCoinbaseTrades().addLast(trade);
         } else {
-            return; // Ignore other exchanges for now
+            return; 
         }
 
         // 2. Evict old trades
@@ -97,7 +96,7 @@ public class AnomalyDetectionConsumer {
                         .timestamp(now)
                         .build();
 
-                // Publish to Kafka (this is non-blocking locally, but relies on @RetryableTopic if Kafka is down)
+                // Publish to Kafka 
                 kafkaTemplate.send("anomalies.detected", symbol, event);
                 
                 // Update cooldown

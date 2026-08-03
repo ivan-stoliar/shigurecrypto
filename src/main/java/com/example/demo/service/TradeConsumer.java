@@ -15,7 +15,6 @@ public class TradeConsumer {
 
     private final TradeService tradeService;
 
-    @RetryableTopic
     @KafkaListener(topics = "trades.raw", groupId = "archiver-group")
     public void consumeTrade(Trade trade, Acknowledgment ack) {
         log.debug("Consumed trade from Kafka -> Symbol: {}, Exchange: {}, Price: {}",

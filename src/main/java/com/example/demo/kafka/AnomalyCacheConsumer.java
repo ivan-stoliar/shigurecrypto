@@ -16,7 +16,6 @@ public class AnomalyCacheConsumer {
 
     private final RedisTemplate<String, AnomalyEvent> anomalyRedisTemplate;
 
-    @RetryableTopic
     @KafkaListener(topics = "anomalies.detected", groupId = "redis-cache-group")
     public void consumeAnomaly(AnomalyEvent event) {
         log.info("Caching anomaly for symbol: {}", event.getSymbol());

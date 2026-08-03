@@ -33,7 +33,7 @@ public class AnomalyDetectionService {
     @Value("${anomaly.window.minutes:1}")
     private int windowMinutes;
 
-    // Scheduled polling removed in favor of real-time Kafka stream processing (AnomalyDetectionConsumer)
+    
     @Transactional
     public void detectAnomalies() {
         Instant startTime = Instant.now().minus(windowMinutes, ChronoUnit.MINUTES);
